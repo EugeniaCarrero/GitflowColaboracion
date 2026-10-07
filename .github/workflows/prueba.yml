@@ -1,0 +1,20 @@
+name: Comprobar tokens
+
+on:
+  push:
+
+jobs:
+  comprobar-token:
+    runs-on: self-hosted
+    env:
+      DEV_TOKEN: ${{ secrets.DEV_TOKEN }}
+    steps:
+      - name: Comprobar tokens
+        shell: powershell
+        run: |
+          if ($env:DEV_TOKEN -eq $env:LOCAL_DEV_TOKEN) {
+            Write-Host "Los tokens coinciden"
+          } else {
+            Write-Host "Los tokens NO coinciden"
+            exit 1
+          }
