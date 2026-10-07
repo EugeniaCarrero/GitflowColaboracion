@@ -12,10 +12,13 @@ jobs:
       - name: Comprobar tokens
         shell: powershell
         run: |
+          Write-Host "LOCAL_DEV_TOKEN existe: $([string]::IsNullOrEmpty($env:LOCAL_DEV_TOKEN) -eq $false)"
+          Write-Host "Longitud LOCAL_DEV_TOKEN: $($env:LOCAL_DEV_TOKEN.Length)"
           if ($env:DEV_TOKEN -eq $env:LOCAL_DEV_TOKEN) {
             Write-Host "Los tokens coinciden"
           } else {
             Write-Host "Los tokens NO coinciden"
             exit 1
           }
+
 # Segunda prueba
