@@ -1,0 +1,54 @@
+name: CD
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches: [main]
+
+  push:
+    branches: [main]
+
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+
+  bump-version:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Incrementar versión en el README
+        run: |
+          LAST=$(grep -oP 'AppVersion-\K[0-9]+' README.md | tail -1)
+          NEXT=$((LAST + 1))
+          FECHA=$(date '+%d/%m/%Y %H:%M')
+          echo "- AppVersion-$NEXT - $FECHA" >> README.md
+                - name: Commit y push del README
+
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add README.md
+          git commit -m "docs: bump de versión" || echo "Sin cambios que commitear"
+          git push || echo "Nada que subir"
+
+
+
+  validate-prod:
+    needs: bump-version
+    runs-on: self-hosted
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validar entorno de producción
+        env:
+          TOKEN: ${{ secrets.PROD_TOKEN }}
+        run: |
+          if ($env:TOKEN -eq $env:LOCAL_PROD_TOKEN) {
+            Write-Host "CD: validación de producción correcta ✅ — listo para desplegar"
+          } else {
+            Write-Host "CD: validación fallida ❌"
+            exit 1
+          }
